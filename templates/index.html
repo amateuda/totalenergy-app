@@ -1,9 +1,48 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TotalEnergy App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>TotalEnergy App</h1>
+        </div>
+    </header>
 
-{% block title %}Inicio - TotalEnergy{% endblock %}
+    <main class="container">
+        <section class="welcome-section">
+            <h1>Bienvenido a TotalEnergy</h1>
+            <p>TOTALENERGY SOLUCIONES INTEGRALES</p>
 
-{% block content %}
-    <h1>Bienvenido a TotalEnergy</h1>
-    <p>Gestiona tus proyectos de energía de manera eficiente.</p>
-    <p>Para empezar, puedes <a href="{{ url_for('login') }}">iniciar sesión</a> o explorar las funciones de administración.</p>
-{% endblock %}
+            <div class="auth-box">
+                <h2>Acceder a tu Cuenta</h2>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class="flashes">
+                            {% for category, message in messages %}
+                                <li class="{{ category }}">{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+                <form method="POST" action="/login">
+                    <input type="text" name="username" placeholder="Usuario" required><br>
+                    <input type="password" name="password" placeholder="Contraseña" required><br>
+                    <input type="submit" value="Ingresar">
+                </form>
+                <p>¿No tienes una cuenta? <a href="{{ url_for('register') }}">Regístrate aquí</a></p>
+            </div>
+
+            <p class="copyright">&copy; 2025 TotalEnergy. Todos los derechos reservados.</p>
+        </section>
+    </main>
+
+    <footer>
+        </footer>
+</body>
+</html>
