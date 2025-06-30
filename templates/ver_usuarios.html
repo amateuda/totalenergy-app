@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Ver Usuarios{% endblock %}
+
+{% block content %}
+    <h1>Lista de Usuarios</h1>
+    {% if usuarios %}
+        <table border="1" style="width:100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Fecha de Registro</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario in usuarios %}
+                <tr>
+                    <td>{{ usuario.id }}</td>
+                    <td>{{ usuario.nombre }}</td>
+                    <td>{{ usuario.email }}</td>
+                    <td>{{ usuario.rol }}</td>
+                    <td>{{ usuario.fecha_registro }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay usuarios registrados.</p>
+    {% endif %}
+{% endblock %}

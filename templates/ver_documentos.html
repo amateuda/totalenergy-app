@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Documentos de Obra - {{ obra.nombre_obra }}{% endblock %}
+
+{% block content %}
+    <h1>Documentos para la Obra: {{ obra.nombre_obra }} (ID: {{ obra.id }})</h1>
+    {% if documentos %}
+        <table border="1" style="width:100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tipo de Documento</th>
+                    <th>Nombre de Archivo</th>
+                    <th>URL de Archivo</th>
+                    <th>Fecha de Subida</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documentos %}
+                <tr>
+                    <td>{{ doc.id }}</td>
+                    <td>{{ doc.tipo_documento }}</td>
+                    <td>{{ doc.nombre_archivo }}</td>
+                    <td><a href="{{ doc.url_archivo }}" target="_blank">{{ doc.url_archivo }}</a></td>
+                    <td>{{ doc.fecha_subida }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay documentos registrados para esta obra.</p>
+    {% endif %}
+    <p><a href="{{ url_for('ver_obras') }}">Volver a la lista de Obras</a></p>
+{% endblock %}

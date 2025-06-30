@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Ver Obras{% endblock %}
+
+{% block content %}
+    <h1>Lista de Obras</h1>
+    {% if obras %}
+        <table border="1" style="width:100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre de Obra</th>
+                    <th>Cliente</th>
+                    <th>Estado</th>
+                    <th>Avance</th>
+                    <th>Fecha Inicio</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for obra in obras %}
+                <tr>
+                    <td>{{ obra.id }}</td>
+                    <td>{{ obra.nombre_obra }}</td>
+                    <td>{{ obra.cliente.nombre_empresa if obra.cliente else 'Cliente Desconocido' }}</td>
+                    <td>{{ obra.estado }}</td>
+                    <td>{{ obra.porcentaje_avance }}%</td>
+                    <td>{{ obra.fecha_inicio }}</td>
+                    <td>
+                        <a href="{{ url_for('ver_documentos', obra_id=obra.id) }}">Documentos</a> |
+                        <a href="{{ url_for('ver_historial_avance', obra_id=obra.id) }}">Avance</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay obras registradas.</p>
+    {% endif %}
+{% endblock %}

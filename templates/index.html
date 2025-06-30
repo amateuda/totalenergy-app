@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - TotalEnergy{% endblock %}
+
+{% block content %}
+    <h1>Bienvenido a TotalEnergy</h1>
+    <p>Gestiona tus proyectos de energía de manera eficiente.</p>
+    <p>Para empezar, puedes <a href="{{ url_for('login') }}">iniciar sesión</a> o explorar las funciones de administración.</p>
+{% endblock %}

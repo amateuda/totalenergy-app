@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Avance - {{ obra.nombre_obra }}{% endblock %}
+
+{% block content %}
+    <h1>Historial de Avance para la Obra: {{ obra.nombre_obra }} (ID: {{ obra.id }})</h1>
+    {% if historial %}
+        <table border="1" style="width:100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>Fecha Actualización</th>
+                    <th>% Anterior</th>
+                    <th>% Nuevo</th>
+                    <th>Comentarios</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in historial %}
+                <tr>
+                    <td>{{ h.fecha_actualizacion }}</td>
+                    <td>{{ h.porcentaje_anterior }}%</td>
+                    <td>{{ h.porcentaje_nuevo }}%</td>
+                    <td>{{ h.comentarios or 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay historial de avance registrado para esta obra.</p>
+    {% endif %}
+    <p><a href="{{ url_for('ver_obras') }}">Volver a la lista de Obras</a></p>
+{% endblock %}
