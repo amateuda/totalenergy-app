@@ -1,21 +1,17 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash # Importa para manejar contraseñas
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
 # --- Configuración de la base de datos ---
-# Render (producción) usará la variable de entorno DATABASE_URL.
-# Para desarrollo local, si no tienes PostgreSQL local, puedes usar SQLite (sqlite:///site.db).
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
 # --- Configuración de la SECRET_KEY ---
-# Usa la variable de entorno SECRET_KEY de Render.
-# En local, si no está configurada, usará la clave por defecto.
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'una_clave_secreta_super_segura_aqui_cambiala_en_produccion')
 
 # --- Definir el modelo de la tabla Obras ---
@@ -33,27 +29,22 @@ class Obra(db.Model):
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False) # Longitud AUMENTADA a 255 para el hash de contraseña
+    password_hash = db.Column(db.String(255), nullable=False)
 
     def set_password(self, password):
-        # Hashea la contraseña para guardarla de forma segura
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        # Verifica si la contraseña proporcionada coincide con la hasheada
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return f"<User {self.username}>"
 
-# --- CREACIÓN DE TABLAS EN LA BASE DE DATOS (PARA PRODUCCIÓN EN RENDER) ---
-# Este bloque se ejecutará CADA VEZ que la aplicación se inicie en Render.
-# Se usó para la creación INICIAL de tablas.
-# ¡IMPORTANTE!: Dado que las tablas 'obras' y 'user' ya se crearon con éxito
-# en Render, COMENTAMOS esta línea para evitar problemas en futuras actualizaciones de esquema.
-# Para cambios en el esquema en un proyecto real, se usarían migraciones (Flask-Migrate).
+# --- CREACIÓN DE TABLAS EN LA BASE DE DATOS ---
+# Asegúrate de que esta línea esté COMENTADA si ya creaste las tablas en Render.
+# Si la descomentas, Render intentará crear las tablas de nuevo al desplegar, lo cual podría dar error si ya existen.
 with app.app_context():
-    # db.create_all() # ¡COMENTADO! Las tablas ya están creadas y configuradas correctamente.
+    # db.create_all() 
     pass
 
 
@@ -71,11 +62,11 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and user.check_password(password):
-            # En una aplicación real, aquí configurarías una sesión para el usuario (ej. Flask-Login)
             flash('Inicio de sesión exitoso!', 'success')
             return redirect(url_for('dashboard'))
         else:
             flash('Usuario o contraseña incorrectos.', 'danger')
+    # Renderizar login.html solo si el método es GET o el POST falla
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -84,29 +75,27 @@ def register():
         username = request.form['username']
         password = request.form['password']
 
-        # Verificar si el nombre de usuario ya existe
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             flash('El nombre de usuario ya existe. Por favor, elige otro.', 'danger')
         else:
             new_user = User(username=username)
-            new_user.set_password(password) # Hashea y guarda la contraseña
+            new_user.set_password(password)
             db.session.add(new_user)
             db.session.commit()
             flash('Usuario creado con éxito! Por favor, inicia sesión.', 'success')
             return redirect(url_for('login'))
+    # Renderizar register.html solo si el método es GET o el POST falla
     return render_template('register.html')
 
 
 @app.route('/dashboard')
 def dashboard():
-    # En una aplicación real, aquí verificarías si el usuario está logueado
     obras = Obra.query.all()
     return render_template('dashboard.html', obras=obras)
 
 @app.route('/add_obra', methods=['GET', 'POST'])
 def add_obra():
-    # Por ahora, esta ruta no está protegida, pero lo estará más adelante con el sistema de login
     if request.method == 'POST':
         nombre = request.form['nombre_obra']
         estado = request.form['estado']
@@ -129,7 +118,7 @@ def add_obra():
         )
         db.session.add(nueva_obra)
         db.session.commit()
-        flash('Obra añadida con éxito!', 'success') # Mensaje de éxito
+        flash('Obra añadida con éxito!', 'success')
         return redirect(url_for('dashboard'))
     return render_template('add_obra.html')
 
