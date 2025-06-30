@@ -1,0 +1,70 @@
+/* Estilos generales del cuerpo y contenedor */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f4f4; /* Fondo gris claro */
+    color: #333; /* Color de texto oscuro */
+}
+.container {
+    max-width: 900px; /* Ancho máximo para el contenido principal */
+    margin: 20px auto; /* Centra el contenedor en la página */
+    background-color: #fff; /* Fondo blanco para el contenido */
+    padding: 20px; /* Espacio interno */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra suave */
+}
+
+/* Estilos para encabezados */
+h1, h2 {
+    color: #007bff; /* Color azul para los encabezados */
+    text-align: center; /* Centra el texto */
+}
+
+/* Estilos para la tabla de obras */
+.obra-table table {
+    width: 100%; /* La tabla ocupa todo el ancho disponible */
+    border-collapse: collapse; /* Elimina el espacio entre los bordes de las celdas */
+    margin-top: 20px; /* Margen superior */
+}
+.obra-table th, .obra-table td {
+    border: 1px solid #ddd; /* Borde de celda */
+    padding: 8px; /* Espacio interno de celda */
+    text-align: left; /* Alinea el texto a la izquierda */
+}
+.obra-table th {
+    background-color: #007bff; /* Fondo azul para encabezados de tabla */
+    color: white; /* Texto blanco para encabezados de tabla */
+}
+.obra-table tr:nth-child(even) { /* Estilo para filas pares (rayado de cebra) */
+    background-color: #f2f2f2;
+}
+
+/* Estilos para el formulario add_obra.html */
+form label {
+    display: block; /* Cada etiqueta en su propia línea */
+    margin-bottom: 5px; /* Espacio debajo de la etiqueta */
+    font-weight: bold; /* Texto en negrita */
+}
+form input[type="text"],
+form input[type="number"],
+form select,
+form textarea {
+    width: 100%; /* Campos de entrada ocupan todo el ancho */
+    padding: 8px; /* Espacio interno */
+    margin-bottom: 10px; /* Espacio debajo del campo */
+    border: 1px solid #ddd; /* Borde del campo */
+    border-radius: 4px; /* Bordes redondeados */
+    box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+}
+form input[type="submit"] {
+    background-color: #28a745; /* Color verde para el botón de enviar */
+    color: white; /* Texto blanco */
+    padding: 10px 15px; /* Espacio interno */
+    border: none; /* Sin borde */
+    border-radius: 4px; /* Bordes redondeados */
+    cursor: pointer; /* Cursor de mano al pasar por encima */
+    font-size: 16px; /* Tamaño de fuente */
+}
+form input[type="submit"]:hover {
+    background-color: #218838; /* Color verde más oscuro al pasar por encima */
+}

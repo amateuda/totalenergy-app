@@ -1,0 +1,45 @@
+{% extends "base.html" %} {# Esto extiende tu plantilla base.html #}
+
+{% block title %}Añadir Obra{% endblock %} {# Define el título específico de esta página #}
+
+{% block content %} {# Aquí es donde se insertará el contenido de esta página en base.html #}
+<div class="container">
+    <h1>Añadir Nueva Obra</h1>
+    <form method="POST" action="{{ url_for('add_obra') }}">
+        <label for="nombre_obra">Nombre de la Obra:</label><br>
+        <input type="text" id="nombre_obra" name="nombre_obra" required><br><br>
+
+        <label for="estado">Estado:</label><br>
+        <select id="estado" name="estado" onchange="togglePorcentaje()">
+            <option value="En proceso">En proceso</option>
+            <option value="Finalizada">Finalizada</option>
+        </select><br><br>
+
+        <div id="porcentajeDiv">
+            <label for="porcentaje_avance">Porcentaje de Avance (si 'En proceso'):</label><br>
+            <input type="number" id="porcentaje_avance" name="porcentaje_avance" min="0" max="100"><br><br>
+        </div>
+
+        <label for="observaciones">Observaciones:</label><br>
+        <textarea id="observaciones" name="observaciones" rows="4" cols="50"></textarea><br><br>
+
+        <input type="submit" value="Añadir Obra">
+    </form>
+    <p><a href="{{ url_for('dashboard') }}">Volver al Dashboard</a></p>
+</div>
+
+<script>
+    // Función JavaScript para mostrar/ocultar el campo de porcentaje según el estado
+    function togglePorcentaje() {
+        var estado = document.getElementById("estado").value;
+        var porcentajeDiv = document.getElementById("porcentajeDiv");
+        if (estado === "En proceso") {
+            porcentajeDiv.style.display = "block"; // Muestra el div
+        } else {
+            porcentajeDiv.style.display = "none";  // Oculta el div
+        }
+    }
+    // Llama a la función al cargar la página para asegurar el estado inicial correcto
+    window.onload = togglePorcentaje;
+</script>
+{% endblock %}

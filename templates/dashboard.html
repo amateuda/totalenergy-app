@@ -1,18 +1,40 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {# Esto extiende tu plantilla base.html #}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard - TotalEnergy{% endblock %} {# Define el título específico de esta página #}
 
-{% block content %}
-    <h1>Bienvenido, {{ user_name }}!</h1>
-    <p>Tu rol es: {{ user_rol }}</p>
+{% block content %} {# Aquí es donde se insertará el contenido de esta página en base.html #}
+<div class="container">
+    <h1>Bio Etanol Río Cuarto Sociedad Anónima</h1> {# El encabezado principal que solicitaste #}
 
-    <h2>Opciones Principales:</h2>
-    <ul>
-        <li><a href="{{ url_for('ver_obras') }}">Ver Todas las Obras</a></li>
-        <li><a href="{{ url_for('ver_clientes') }}">Ver Todos los Clientes</a></li>
-        <li><a href="{{ url_for('ver_usuarios') }}">Ver Todos los Usuarios</a></li>
-        <li><a href="{{ url_for('logout') }}">Cerrar Sesión</a></li>
-    </ul>
+    <h2>Dashboard de Obras</h2>
 
-    <p>Esta es tu área de trabajo personalizada. Aquí podrás ver la información relevante para tu rol y acceder a las herramientas de gestión.</p>
+    <div class="obra-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Obras</th>
+                    <th>Estados</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for obra in obras %} {# Itera sobre la lista de 'obras' que le pasamos desde app.py #}
+                <tr>
+                    <td>{{ obra.nombre_obra }}</td> {# Muestra el nombre de la obra #}
+                    <td>
+                        {{ obra.estado }} {# Muestra el estado (En proceso/Finalizada) #}
+                        {% if obra.estado == 'En proceso' and obra.porcentaje_avance is not none %}
+                            ({{ obra.porcentaje_avance }}%) {# Si está en proceso, muestra el porcentaje #}
+                        {% endif %}
+                    </td>
+                    <td>{{ obra.observaciones if obra.observaciones else 'Ninguna' }}</td> {# Muestra observaciones, o 'Ninguna' si no hay #}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# Enlace temporal para añadir nuevas obras, luego lo integraríamos en un menú de administración #}
+    <p><a href="{{ url_for('add_obra') }}">Añadir Nueva Obra (Temporal)</a></p>
+</div>
 {% endblock %}

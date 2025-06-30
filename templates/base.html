@@ -4,34 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TotalEnergy App{% endblock %}</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
-        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 800px; margin: 20px auto; }
-        h1 { color: #0056b3; }
-        nav ul { list-style-type: none; padding: 0; background-color: #007bff; overflow: hidden; border-radius: 5px; }
-        nav ul li { float: left; }
-        nav ul li a { display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none; }
-        nav ul li a:hover { background-color: #0056b3; }
-        .content { margin-top: 20px; }
-        footer { text-align: center; margin-top: 30px; padding-top: 10px; border-top: 1px solid #eee; color: #777; }
-    </style>
+    {# Aquí es donde se enlaza tu archivo CSS. Asegúrate de que 'styles.css' esté en static/css/ #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {# Puedes añadir otros enlaces a CSS, JavaScript o metadatos aquí si los necesitas #}
 </head>
 <body>
-    <div class="container">
-        <nav>
-            <ul>
-                <li><a href="/">Inicio</a></li>
-                <li><a href="/login">Login</a></li>
-                <li><a href="/dashboard">Dashboard (Ejemplo)</a></li>
-                </ul>
-        </nav>
-        <hr>
-        <div class="content">
-            {% block content %}{% endblock %}
-        </div>
-        <footer>
-            <p>&copy; 2025 TotalEnergy. Todos los derechos reservados.</p>
-        </footer>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Inicio</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard (Ejemplo)</a></li>
+            {# Puedes añadir más enlaces de navegación aquí según tus necesidades #}
+        </ul>
+    </nav>
+    <div class="content">
+        {% block content %}{% endblock %} {# Este es el bloque que se rellena con el contenido específico de cada página #}
     </div>
+    <footer>
+        <p>&copy; 2025 TotalEnergy. Todos los derechos reservados.</p>
+    </footer>
 </body>
 </html>
