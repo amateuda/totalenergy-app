@@ -1,41 +1,56 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash # Importa para manejar contraseñas
 
 app = Flask(__name__)
 
 # --- Configuración de la base de datos ---
-# Render (producción) usará la variable de entorno DATABASE_URL.
-# Para desarrollo local, si no tienes PostgreSQL local, puedes usar SQLite (sqlite:///site.db).
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
 # --- Configuración de la SECRET_KEY ---
-# Usa la variable de entorno SECRET_KEY de Render.
-# En local, si no está configurada, usará la clave por defecto.
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'una_clave_secreta_super_segura_aqui')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'una_clave_secreta_super_segura_aqui_cambiala_en_produccion')
 
 # --- Definir el modelo de la tabla Obras ---
-# Esta clase representa la tabla 'obras' en tu base de datos.
 class Obra(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre_obra = db.Column(db.String(255), nullable=False)
-    estado = db.Column(db.String(50), nullable=False) # 'En proceso' o 'Finalizada'
-    porcentaje_avance = db.Column(db.Integer, nullable=True) # Solo si 'En proceso', puede ser nulo
-    observaciones = db.Column(db.Text, nullable=True) # Puede ser nulo
+    estado = db.Column(db.String(50), nullable=False)
+    porcentaje_avance = db.Column(db.Integer, nullable=True)
+    observaciones = db.Column(db.Text, nullable=True)
 
     def __repr__(self):
         return f"<Obra {self.nombre_obra} - {self.estado}>"
 
-# --- CREACIÓN DE TABLAS EN LA BASE DE DATOS (AHORA COMENTADO) ---
-# ¡IMPORTANTE!: Este bloque se utilizó para la creación INICIAL de las tablas en Render
-# debido a la restricción de la shell en el plan gratuito.
-# Una vez que la tabla 'obras' se creó con éxito, es crucial COMENTAR o ELIMINAR esta línea
-# para evitar problemas en futuros reinicios o despliegues de la aplicación.
-# with app.app_context():
-#    db.create_all() # ¡Esta línea ha sido comentada después de la creación inicial de la tabla!
+# --- Definir el modelo de la tabla Usuarios ---
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False) # Almacena la contraseña hasheada
+
+    def set_password(self, password):
+        # Hashea la contraseña para guardarla de forma segura
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        # Verifica si la contraseña proporcionada coincide con la hasheada
+        return check_password_hash(self.password_hash, password)
+
+    def __repr__(self):
+        return f"<User {self.username}>"
+
+# --- CREACIÓN DE TABLAS EN LA BASE DE DATOS (PARA PRODUCCIÓN EN RENDER) ---
+# Este bloque se ejecutará CADA VEZ que la aplicación se inicie en Render.
+# Se usa para la creación INICIAL de tablas en la versión gratuita de Render.
+# ¡IMPORTANTE!: Después de que las tablas 'obras' y 'user' se hayan creado con éxito
+# en Render y hayas cargado datos/usuarios de prueba,
+# COMENTA O ELIMINA este bloque para evitar problemas en futuras actualizaciones de esquema.
+with app.app_context():
+    db.create_all() # Esto creará las tablas 'obras' y 'user' si no existen.
+
 
 # --- Rutas de la aplicación ---
 
@@ -43,27 +58,56 @@ class Obra(db.Model):
 def index():
     return render_template('index.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Aquí irá la lógica de autenticación más adelante
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+
+        if user and user.check_password(password):
+            # En una aplicación real, aquí configurarías una sesión para el usuario (ej. Flask-Login)
+            flash('Inicio de sesión exitoso!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Usuario o contraseña incorrectos.', 'danger')
     return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Verificar si el nombre de usuario ya existe
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash('El nombre de usuario ya existe. Por favor, elige otro.', 'danger')
+        else:
+            new_user = User(username=username)
+            new_user.set_password(password) # Hashea y guarda la contraseña
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Usuario creado con éxito! Por favor, inicia sesión.', 'success')
+            return redirect(url_for('login'))
+    return render_template('register.html')
+
 
 @app.route('/dashboard')
 def dashboard():
-    # Obtiene todas las obras de la base de datos para mostrarlas
+    # En una aplicación real, aquí verificarías si el usuario está logueado
     obras = Obra.query.all()
     return render_template('dashboard.html', obras=obras)
 
 @app.route('/add_obra', methods=['GET', 'POST'])
 def add_obra():
+    # Por ahora, esta ruta no está protegida, pero lo estará más adelante con el sistema de login
     if request.method == 'POST':
-        # Recoge los datos del formulario
         nombre = request.form['nombre_obra']
         estado = request.form['estado']
         porcentaje = request.form.get('porcentaje_avance')
         observaciones = request.form.get('observaciones')
 
-        # Procesa el porcentaje, asegurándose de que sea entero o None
         if porcentaje:
             try:
                 porcentaje = int(porcentaje)
@@ -72,7 +116,6 @@ def add_obra():
         else:
             porcentaje = None
 
-        # Crea una nueva instancia de Obra y la guarda en la base de datos
         nueva_obra = Obra(
             nombre_obra=nombre,
             estado=estado,
@@ -81,13 +124,10 @@ def add_obra():
         )
         db.session.add(nueva_obra)
         db.session.commit()
-        return redirect(url_for('dashboard')) # Redirige al dashboard después de guardar
-    return render_template('add_obra.html') # Muestra el formulario para añadir obra
+        flash('Obra añadida con éxito!', 'success') # Mensaje de éxito
+        return redirect(url_for('dashboard'))
+    return render_template('add_obra.html')
 
 # --- Bloque de ejecución principal para desarrollo local ---
 if __name__ == '__main__':
-    # Cuando ejecutas 'python app.py' localmente.
-    # Si quieres que la tabla se cree automáticamente SOLO para desarrollo local, puedes volver a descomentar
-    # with app.app_context():
-    #    db.create_all()
-    app.run(debug=True) # Inicia el servidor de desarrollo en modo depuración
+    app.run(debug=True)
