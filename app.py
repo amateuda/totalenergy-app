@@ -33,7 +33,7 @@ class Obra(db.Model):
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False) # Almacena la contraseña hasheada
+    password_hash = db.Column(db.String(255), nullable=False) # Longitud AUMENTADA a 255 para el hash de contraseña
 
     def set_password(self, password):
         # Hashea la contraseña para guardarla de forma segura
@@ -46,14 +46,15 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.username}>"
 
-# --- CREACIÓN DE TABLAS EN LA BASE DE DATOS ---
+# --- CREACIÓN DE TABLAS EN LA BASE DE DATOS (PARA PRODUCCIÓN EN RENDER) ---
 # Este bloque se ejecutará CADA VEZ que la aplicación se inicie en Render.
-# Se usa para la creación INICIAL de tablas en la versión gratuita de Render.
-# ¡IMPORTANTE!: Después de que las tablas 'obras' y 'user' se hayan creado con éxito
-# en Render y hayas cargado datos/usuarios de prueba,
-# COMENTA O ELIMINA este bloque para evitar problemas en futuras actualizaciones de esquema.
+# Se usó para la creación INICIAL de tablas.
+# ¡IMPORTANTE!: Dado que las tablas 'obras' y 'user' ya se crearon con éxito
+# en Render, COMENTAMOS esta línea para evitar problemas en futuras actualizaciones de esquema.
+# Para cambios en el esquema en un proyecto real, se usarían migraciones (Flask-Migrate).
 with app.app_context():
-    db.create_all() # Esto creará las tablas 'obras' y 'user' si no existen.
+    # db.create_all() # ¡COMENTADO! Las tablas ya están creadas y configuradas correctamente.
+    pass
 
 
 # --- Rutas de la aplicación ---
