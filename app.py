@@ -5,27 +5,20 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 
 # --- Configuración de la base de datos ---
-# En Render (producción), usaremos la variable de entorno DATABASE_URL que ya configuraste.
-# Para desarrollo local, puedes usar una base de datos SQLite temporal si no tienes PostgreSQL local configurado,
-# o una configuración de PostgreSQL local si la tienes.
-# La línea 'os.environ.get('DATABASE_URL')' intentará obtener la URL de Render,
-# si no la encuentra (porque estás localmente), usará lo que pongas después del ','.
-# Por ejemplo, para desarrollo local con SQLite (más sencillo de iniciar):
+# Render (producción) usará la variable de entorno DATABASE_URL.
+# Para desarrollo local, si no tienes PostgreSQL local, puedes usar SQLite (sqlite:///site.db).
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
-# Si tienes PostgreSQL local y quieres usarlo, podrías poner algo como:
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost/dbname')
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Recomendado para evitar warnings de SQLAlchemy
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
 # --- Configuración de la SECRET_KEY ---
-# Usa la variable de entorno SECRET_KEY que ya configuraste en Render.
-# Si no la encuentra (ej. en desarrollo local sin configurar la variable), usará la clave por defecto.
+# Usa la variable de entorno SECRET_KEY de Render.
+# En local, si no está configurada, usará la clave por defecto.
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'una_clave_secreta_super_segura_aqui')
 
 # --- Definir el modelo de la tabla Obras ---
-# Esta clase representa la tabla 'obras' en tu base de datos PostgreSQL.
+# Esta clase representa la tabla 'obras' en tu base de datos.
 class Obra(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre_obra = db.Column(db.String(255), nullable=False)
@@ -34,8 +27,15 @@ class Obra(db.Model):
     observaciones = db.Column(db.Text, nullable=True) # Puede ser nulo
 
     def __repr__(self):
-        # Representación amigable para depuración
         return f"<Obra {self.nombre_obra} - {self.estado}>"
+
+# --- CREACIÓN DE TABLAS EN LA BASE DE DATOS ---
+# Este bloque se ejecutará CADA VEZ que la aplicación se inicie en Render (o localmente).
+# Es útil para la creación inicial de tablas en la versión gratuita de Render.
+# ¡IMPORTANTE!: Después de que la tabla 'obras' se haya creado con éxito en Render y hayas cargado datos de prueba,
+# COMENTA O ELIMINA este bloque para evitar problemas en futuras actualizaciones de esquema.
+with app.app_context():
+    db.create_all() # Esto creará la tabla 'obras' si no existe.
 
 # --- Rutas de la aplicación ---
 
@@ -45,58 +45,47 @@ def index():
 
 @app.route('/login')
 def login():
-    # Por ahora, solo muestra la plantilla de login. La lógica de autenticación se añadiría aquí.
+    # Aquí irá la lógica de autenticación más adelante
     return render_template('login.html')
 
 @app.route('/dashboard')
 def dashboard():
-    # Recupera todas las obras de la base de datos
+    # Obtiene todas las obras de la base de datos para mostrarlas
     obras = Obra.query.all()
-    # Pasa la lista de obras a la plantilla 'dashboard.html' para que se muestren
     return render_template('dashboard.html', obras=obras)
 
-# --- Ruta para agregar nuevas obras (temporal y para prueba) ---
-# Esta ruta permitirá añadir datos a tu tabla 'obras'.
-# En un sistema real, esta ruta estaría protegida por autenticación y/o roles de usuario.
 @app.route('/add_obra', methods=['GET', 'POST'])
 def add_obra():
     if request.method == 'POST':
-        # Si la solicitud es POST, el usuario envió el formulario
+        # Recoge los datos del formulario
         nombre = request.form['nombre_obra']
         estado = request.form['estado']
-        porcentaje = request.form.get('porcentaje_avance') # Usar .get() para campos opcionales
+        porcentaje = request.form.get('porcentaje_avance')
         observaciones = request.form.get('observaciones')
 
-        # Convertir porcentaje a entero si se proporcionó, si no, dejarlo como None
+        # Procesa el porcentaje, asegurándose de que sea entero o None
         if porcentaje:
             try:
                 porcentaje = int(porcentaje)
             except ValueError:
-                porcentaje = None # Si no es un número válido, lo dejamos nulo
+                porcentaje = None
         else:
             porcentaje = None
 
-        # Crea una nueva instancia de la Obra con los datos del formulario
+        # Crea una nueva instancia de Obra y la guarda en la base de datos
         nueva_obra = Obra(
             nombre_obra=nombre,
             estado=estado,
             porcentaje_avance=porcentaje,
             observaciones=observaciones
         )
-        # Añade la nueva obra a la sesión de la base de datos y guarda los cambios
         db.session.add(nueva_obra)
         db.session.commit()
-        # Redirige al usuario al dashboard para que vea la obra añadida
-        return redirect(url_for('dashboard'))
-    # Si la solicitud es GET, simplemente muestra el formulario para añadir una obra
-    return render_template('add_obra.html')
+        return redirect(url_for('dashboard')) # Redirige al dashboard después de guardar
+    return render_template('add_obra.html') # Muestra el formulario para añadir obra
 
-
-# --- Bloque de ejecución principal cuando el script se corre directamente ---
+# --- Bloque de ejecución principal para desarrollo local ---
 if __name__ == '__main__':
-    # 'with app.app_context():' es crucial para que SQLAlchemy sepa a qué aplicación Flask pertenece 'db'.
-    # db.create_all() crea las tablas en la base de datos si aún no existen.
-    # Esto es útil para desarrollo local. En Render, lo haremos manualmente una vez en la Shell.
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True) # Inicia el servidor de desarrollo de Flask
+    # Cuando ejecutas 'python app.py' localmente.
+    # La llamada a db.create_all() que está arriba ya se encargará de crear la tabla.
+    app.run(debug=True) # Inicia el servidor de desarrollo en modo depuración
