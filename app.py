@@ -6,12 +6,16 @@ from werkzeug.security import generate_password_hash, check_password_hash # Impo
 app = Flask(__name__)
 
 # --- Configuración de la base de datos ---
+# Render (producción) usará la variable de entorno DATABASE_URL.
+# Para desarrollo local, si no tienes PostgreSQL local, puedes usar SQLite (sqlite:///site.db).
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
 # --- Configuración de la SECRET_KEY ---
+# Usa la variable de entorno SECRET_KEY de Render.
+# En local, si no está configurada, usará la clave por defecto.
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'una_clave_secreta_super_segura_aqui_cambiala_en_produccion')
 
 # --- Definir el modelo de la tabla Obras ---
@@ -42,7 +46,7 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.username}>"
 
-# --- CREACIÓN DE TABLAS EN LA BASE DE DATOS (PARA PRODUCCIÓN EN RENDER) ---
+# --- CREACIÓN DE TABLAS EN LA BASE DE DATOS ---
 # Este bloque se ejecutará CADA VEZ que la aplicación se inicie en Render.
 # Se usa para la creación INICIAL de tablas en la versión gratuita de Render.
 # ¡IMPORTANTE!: Después de que las tablas 'obras' y 'user' se hayan creado con éxito
