@@ -29,13 +29,13 @@ class Obra(db.Model):
     def __repr__(self):
         return f"<Obra {self.nombre_obra} - {self.estado}>"
 
-# --- CREACIÓN DE TABLAS EN LA BASE DE DATOS ---
-# Este bloque se ejecutará CADA VEZ que la aplicación se inicie en Render (o localmente).
-# Es útil para la creación inicial de tablas en la versión gratuita de Render.
-# ¡IMPORTANTE!: Después de que la tabla 'obras' se haya creado con éxito en Render y hayas cargado datos de prueba,
-# COMENTA O ELIMINA este bloque para evitar problemas en futuras actualizaciones de esquema.
-with app.app_context():
-    db.create_all() # Esto creará la tabla 'obras' si no existe.
+# --- CREACIÓN DE TABLAS EN LA BASE DE DATOS (AHORA COMENTADO) ---
+# ¡IMPORTANTE!: Este bloque se utilizó para la creación INICIAL de las tablas en Render
+# debido a la restricción de la shell en el plan gratuito.
+# Una vez que la tabla 'obras' se creó con éxito, es crucial COMENTAR o ELIMINAR esta línea
+# para evitar problemas en futuros reinicios o despliegues de la aplicación.
+# with app.app_context():
+#    db.create_all() # ¡Esta línea ha sido comentada después de la creación inicial de la tabla!
 
 # --- Rutas de la aplicación ---
 
@@ -87,5 +87,7 @@ def add_obra():
 # --- Bloque de ejecución principal para desarrollo local ---
 if __name__ == '__main__':
     # Cuando ejecutas 'python app.py' localmente.
-    # La llamada a db.create_all() que está arriba ya se encargará de crear la tabla.
+    # Si quieres que la tabla se cree automáticamente SOLO para desarrollo local, puedes volver a descomentar
+    # with app.app_context():
+    #    db.create_all()
     app.run(debug=True) # Inicia el servidor de desarrollo en modo depuración
