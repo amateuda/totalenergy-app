@@ -28,6 +28,11 @@ class User(db.Model):
     def __repr__(self):
         return f"User('{self.username}')"
 
+# Mover db.create_all() aquí, fuera del if __name__ == '__main__':
+# Esto asegura que las tablas se creen cuando Gunicorn carga la aplicación en Render.
+with app.app_context():
+    db.create_all()
+
 # Rutas de la aplicación
 @app.route('/')
 def home():
@@ -83,9 +88,7 @@ def dashboard():
     return render_template('dashboard.html', title='Dashboard')
 
 
+# El bloque if __name__ == '__main__': ahora solo correrá la app localmente,
+# ya no necesita crear las tablas porque eso ya se hace arriba.
 if __name__ == '__main__':
-    # Este bloque se ejecutará cuando ejecutes el archivo app.py directamente.
-    # Es crucial para crear las tablas de la base de datos.
-    with app.app_context():
-        db.create_all() # Crea las tablas si no existen
     app.run(debug=True) # debug=True para desarrollo, ponlo en False para producción
